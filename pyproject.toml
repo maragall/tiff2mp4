@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tiff2mp4"
+version = "0.1.0"
+description = "Turn a folder of TIFFs into an .mp4 — a tiny drop-a-folder GUI + CLI."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "numpy",
+    "tifffile",
+    "imageio[ffmpeg]>=2.31",
+    "PyQt5>=5.15",
+]
+
+[project.scripts]
+tiff2mp4 = "tiff2mp4.cli:main"          # headless: tiff2mp4 <folder> --limit N --fps 5
+tiff2mp4-gui = "tiff2mp4.app:main"      # the drop-a-folder window
+
+[tool.hatch.build.targets.wheel]
+packages = ["tiff2mp4"]

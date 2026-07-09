@@ -45,16 +45,19 @@ def _as_frame(img: "np.ndarray") -> "np.ndarray":
     return np.repeat(gray[:, :, None], 3, axis=2)
 
 
-def tiffs_to_mp4(folder: str, out_path, fps: int = 5, progress=None):
-    """Encode every TIFF in *folder* (name order) into an H.264 ``.mp4`` at *fps*.
+def tiffs_to_mp4(folder: str, out_path, fps: int = 5, limit=None, progress=None):
+    """Encode the TIFFs in *folder* (name order) into an H.264 ``.mp4`` at *fps*.
 
-    ``progress(i, total, name)`` is called per frame if given. Returns (out_path, n_frames). Raises
-    ValueError when the folder has no TIFFs."""
+    *limit*: if given (> 0), only the FIRST N TIFFs are used — a quick slice to test on a few frames
+    without encoding the whole folder. ``progress(i, total, name)`` is called per frame if given.
+    Returns (out_path, n_frames). Raises ValueError when the folder has no TIFFs."""
     import imageio.v2 as imageio
 
     files = list_tiffs(folder)
     if not files:
         raise ValueError(f"no .tif/.tiff files found in {folder}")
+    if limit is not None and int(limit) > 0:
+        files = files[: int(limit)]
     writer = imageio.get_writer(str(out_path), fps=max(1, int(fps)), codec="libx264",
                                 macro_block_size=None, quality=8)
     try:

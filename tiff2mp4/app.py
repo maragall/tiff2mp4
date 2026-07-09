@@ -27,13 +27,13 @@ class _Worker(QThread):
     done = pyqtSignal(str, int)
     failed = pyqtSignal(str)
 
-    def __init__(self, folder, out, fps):
+    def __init__(self, folder, out, fps, limit):
         super().__init__()
-        self._folder, self._out, self._fps = folder, out, fps
+        self._folder, self._out, self._fps, self._limit = folder, out, fps, limit
 
     def run(self):
         try:
-            p, n = tiffs_to_mp4(self._folder, self._out, self._fps,
+            p, n = tiffs_to_mp4(self._folder, self._out, self._fps, limit=self._limit,
                                 progress=lambda i, t, f: self.progress.emit(i, t, f))
             self.done.emit(p, n)
         except Exception as e:
@@ -64,9 +64,15 @@ class Window(QWidget):
         browse = QPushButton("Browse…"); browse.setStyleSheet(_BTN); browse.clicked.connect(self._browse)
         row.addWidget(browse)
         row.addWidget(QLabel("fps"))
-        self._fps = QSpinBox(); self._fps.setRange(1, 60); self._fps.setValue(5)
-        self._fps.setStyleSheet("QSpinBox{background:#0d1420;border:1px solid #2b3550;border-radius:6px;padding:4px 8px;}")
+        _spin = "QSpinBox{background:#0d1420;border:1px solid #2b3550;border-radius:6px;padding:4px 8px;}"
+        self._fps = QSpinBox(); self._fps.setRange(1, 60); self._fps.setValue(5); self._fps.setStyleSheet(_spin)
         row.addWidget(self._fps)
+        row.addSpacing(12)
+        row.addWidget(QLabel("first N (0 = all)"))
+        self._limit = QSpinBox(); self._limit.setRange(0, 1000000); self._limit.setValue(0)
+        self._limit.setToolTip("Encode only the first N TIFFs (0 = every TIFF). Use it to test quickly.")
+        self._limit.setStyleSheet(_spin)
+        row.addWidget(self._limit)
         row.addStretch(1)
         self._make = QPushButton("● Make MP4"); self._make.setStyleSheet(_BTN)
         self._make.setEnabled(False); self._make.clicked.connect(self._run)
@@ -113,7 +119,7 @@ class Window(QWidget):
         if not out:
             return
         self._make.setEnabled(False)
-        self._worker = _Worker(self._folder, out, self._fps.value())
+        self._worker = _Worker(self._folder, out, self._fps.value(), self._limit.value())
         self._worker.progress.connect(lambda i, t, f: self._status.setText(f"encoding {i}/{t} · {f}"))
         self._worker.done.connect(lambda p, n: (self._status.setText(f"✓ wrote {n} frames → {p}"),
                                                 self._make.setEnabled(True)))

@@ -1,3 +1,7 @@
+# One-command setup:
+#   conda env create -f environment.yml     (run from the repo root)
+#   conda activate tiff2mp4
+# then:  tiff2mp4-gui         (the window)   or   tiff2mp4 <folder> --limit 20   (headless)
 name: tiff2mp4
 channels:
   - conda-forge
@@ -7,5 +11,6 @@ dependencies:
   - tifffile
   - pip
   - pip:
-      - PyQt5
       - imageio[ffmpeg]
+      - PyQt5
+      - "."          # tiff2mp4 itself (installs the tiff2mp4 / tiff2mp4-gui commands)
