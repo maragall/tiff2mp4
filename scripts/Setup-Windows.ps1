@@ -13,11 +13,13 @@ $AppName = "TIFFs to MP4"
 $Module  = "tiff2mp4"
 $repo = Split-Path $PSScriptRoot -Parent
 
-# 1. Find Python. Prefer 3.11 via the 'py' launcher, then any py -3, then 'python' on PATH.
+# 1. Find Python. Prefer a known-good version (3.11/3.10/3.12) over the newest default.
 $pyExe = $null; $pyArgs = @()
 if (Get-Command py -ErrorAction SilentlyContinue) {
-    if ((& py -3.11 -c "print(1)" 2>$null) -eq "1") { $pyExe = "py"; $pyArgs = @("-3.11") }
-    else { $pyExe = "py"; $pyArgs = @("-3") }
+    foreach ($tag in @("-3.11", "-3.10", "-3.12", "-3.13")) {
+        if ((& py $tag -c "print(1)" 2>$null) -eq "1") { $pyExe = "py"; $pyArgs = @($tag); break }
+    }
+    if (-not $pyExe) { $pyExe = "py"; $pyArgs = @("-3") }
 } elseif (Get-Command python -ErrorAction SilentlyContinue) {
     $pyExe = (Get-Command python).Source
 }
