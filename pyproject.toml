@@ -11,6 +11,7 @@ requires-python = ">=3.9"
 dependencies = [
     "numpy",
     "tifffile",
+    "imagecodecs",              # tifffile needs this to decode LZW/compressed Squid TIFFs
     "imageio[ffmpeg]>=2.31",
     "PyQt5>=5.15",
 ]
