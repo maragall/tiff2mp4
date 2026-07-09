@@ -1,0 +1,11 @@
+name: tiff2mp4
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - tifffile
+  - pip
+  - pip:
+      - PyQt5
+      - imageio[ffmpeg]
