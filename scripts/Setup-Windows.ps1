@@ -16,10 +16,13 @@ $repo = Split-Path $PSScriptRoot -Parent
 # 1. Find Python. Prefer a known-good version (3.11/3.10/3.12) over the newest default.
 $pyExe = $null; $pyArgs = @()
 if (Get-Command py -ErrorAction SilentlyContinue) {
-    foreach ($tag in @("-3.11", "-3.10", "-3.12", "-3.13")) {
-        if ((& py $tag -c "print(1)" 2>$null) -eq "1") { $pyExe = "py"; $pyArgs = @($tag); break }
-    }
-    if (-not $pyExe) { $pyExe = "py"; $pyArgs = @("-3") }
+    $listing = (& py --list 2>&1 | Out-String)
+    $avail = @()
+    foreach ($m in [regex]::Matches($listing, '3\.(1[0-9])')) { $avail += [int]$m.Groups[1].Value }
+    $avail = $avail | Sort-Object -Unique
+    $pick = @(11, 10, 12, 13) | Where-Object { $avail -contains $_ } | Select-Object -First 1
+    if (-not $pick -and $avail.Count -gt 0) { $pick = ($avail | Sort-Object | Select-Object -First 1) }
+    if ($pick) { $pyExe = "py"; $pyArgs = @("-3.$pick") } else { $pyExe = "py"; $pyArgs = @("-3") }
 } elseif (Get-Command python -ErrorAction SilentlyContinue) {
     $pyExe = (Get-Command python).Source
 }
