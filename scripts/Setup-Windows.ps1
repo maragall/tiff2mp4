@@ -46,7 +46,8 @@ if (-not (Test-Path $vpy)) {
 # 3. Install the app + deps.
 Write-Host "Installing tiff2mp4 and its dependencies (first time takes a minute) ..."
 & $vpy -m pip install --upgrade pip
-& $vpy -m pip install $repo
+# EDITABLE install: after this, a `git pull` takes effect on the next launch with no reinstall.
+& $vpy -m pip install -e $repo
 if ($LASTEXITCODE -ne 0) {
     Die "pip install failed (see the errors above). Tell Julio the error and we'll pin a version."
 }

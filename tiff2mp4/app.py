@@ -33,10 +33,21 @@ class _Worker(QThread):
 
     def run(self):
         try:
+            from tiff2mp4.movie import list_tiffs
+            n_found = len(list_tiffs(self._folder))
+            print(f"[tiff2mp4] folder={self._folder!r}  tiffs_found={n_found}  fps={self._fps}  "
+                  f"limit={self._limit}  out={self._out!r}", flush=True)
+            if n_found == 0:
+                print("[tiff2mp4] NOTE: 0 TIFFs at the TOP of that folder — this tool does NOT search "
+                      "subfolders. Point it at the folder that directly contains the .tif/.tiff files.",
+                      flush=True)
             p, n = tiffs_to_mp4(self._folder, self._out, self._fps, limit=self._limit,
                                 progress=lambda i, t, f: self.progress.emit(i, t, f))
+            print(f"[tiff2mp4] DONE: wrote {n} frame(s) -> {p}", flush=True)
             self.done.emit(p, n)
         except Exception as e:
+            import traceback
+            traceback.print_exc()          # full traceback to the console
             self.failed.emit(f"{type(e).__name__}: {e}")
 
 
@@ -117,7 +128,9 @@ class Window(QWidget):
         out, _ = QFileDialog.getSaveFileName(self, "Save movie as",
                                              os.path.join(self._folder, "movie.mp4"), "MP4 (*.mp4)")
         if not out:
+            print("[tiff2mp4] Save dialog cancelled - nothing written.", flush=True)
             return
+        print("[tiff2mp4] Make MP4 clicked -> " + out, flush=True)
         self._make.setEnabled(False)
         self._worker = _Worker(self._folder, out, self._fps.value(), self._limit.value())
         self._worker.progress.connect(lambda i, t, f: self._status.setText(f"encoding {i}/{t} · {f}"))
