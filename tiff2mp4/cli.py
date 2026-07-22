@@ -1,6 +1,6 @@
 """Headless: make an .mp4 from a folder of TIFFs, from the command line.
 
-    tiff2mp4 <folder>                       # every TIFF -> <folder>/movie.mp4
+    tiff2mp4 <folder>                       # every TIFF -> <parent-of-folder>/<folder>.mp4
     tiff2mp4 <folder> --limit 20            # only the first 20 TIFFs (quick test slice)
     tiff2mp4 <folder> --fps 10 -o out.mp4
 """
@@ -11,13 +11,14 @@ import argparse
 import os
 import sys
 
-from tiff2mp4.movie import list_tiffs, tiffs_to_mp4
+from tiff2mp4.movie import default_output, list_tiffs, tiffs_to_mp4
 
 
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="tiff2mp4", description="Turn a folder of TIFFs into an .mp4.")
     ap.add_argument("folder", help="folder containing the .tif/.tiff frames")
-    ap.add_argument("-o", "--output", default=None, help="output .mp4 (default: <folder>/movie.mp4)")
+    ap.add_argument("-o", "--output", default=None,
+                    help="output .mp4 (default: <folder>.mp4 next to the folder, in its parent)")
     ap.add_argument("--fps", type=int, default=5, help="playback frames per second (default 5)")
     ap.add_argument("--limit", type=int, default=None,
                     help="encode only the FIRST N TIFFs (a quick test slice; default: all)")
@@ -26,7 +27,7 @@ def main(argv=None):
     folder = os.path.expanduser(args.folder)
     if not os.path.isdir(folder):
         ap.error(f"not a folder: {folder}")
-    out = os.path.expanduser(args.output) if args.output else os.path.join(folder, "movie.mp4")
+    out = os.path.expanduser(args.output) if args.output else default_output(folder)
     total = len(list_tiffs(folder))
     n_use = min(total, args.limit) if args.limit else total
     print(f"encoding {n_use} of {total} TIFF(s) at {args.fps} fps -> {out}")

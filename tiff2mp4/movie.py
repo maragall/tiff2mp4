@@ -25,6 +25,16 @@ def _natural_key(path: str):
     return [int(part) if part.isdigit() else part for part in _DIGIT_RUN.split(os.path.basename(path))]
 
 
+def default_output(folder: str) -> str:
+    """Default .mp4 path for *folder*: in the PARENT directory, named after the folder.
+
+    Writing next to the folder (not inside it) keeps the movie out of the acquisition data, and
+    naming it after the folder keeps siblings from colliding on a shared parent."""
+    folder = os.path.abspath(folder)
+    name = os.path.basename(folder) or "movie"
+    return os.path.join(os.path.dirname(folder), name + ".mp4")
+
+
 def list_tiffs(folder: str) -> list:
     """Every .tif/.tiff in *folder*, naturally sorted by name (the frame order)."""
     files: list = []

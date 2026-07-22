@@ -2,7 +2,7 @@
 
 import os
 
-from tiff2mp4.movie import list_tiffs
+from tiff2mp4.movie import default_output, list_tiffs
 
 
 def _make(folder, names):
@@ -33,3 +33,15 @@ def test_squid_fluorescence_naming_from_zero_with_midname_digits(tmp_path):
 def test_mixed_extensions_still_deduped_and_ordered(tmp_path):
     _make(tmp_path, ["2_a.tif", "10_a.tiff", "1_a.TIFF"])
     assert _prefixes(list_tiffs(str(tmp_path))) == ["1", "2", "10"]
+
+
+def test_default_output_is_in_parent_named_after_folder(tmp_path):
+    acq = tmp_path / "2026-07-22_experiment1"
+    acq.mkdir()
+    assert default_output(str(acq)) == str(tmp_path / "2026-07-22_experiment1.mp4")
+
+
+def test_default_output_handles_trailing_slash(tmp_path):
+    acq = tmp_path / "acq"
+    acq.mkdir()
+    assert default_output(str(acq) + os.sep) == str(tmp_path / "acq.mp4")

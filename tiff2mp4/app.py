@@ -14,7 +14,7 @@ from PyQt5.QtWidgets import (
     QApplication, QFileDialog, QHBoxLayout, QLabel, QPushButton, QSpinBox, QVBoxLayout, QWidget,
 )
 
-from tiff2mp4.movie import list_tiffs, tiffs_to_mp4
+from tiff2mp4.movie import default_output, list_tiffs, tiffs_to_mp4
 
 _BG, _FG, _ACCENT = "#0b0e14", "#e6edf3", "#58a6ff"
 _BTN = ("QPushButton{background:#131824;color:#e6edf3;border:1px solid #2b3550;border-radius:8px;"
@@ -126,7 +126,7 @@ class Window(QWidget):
         if not self._folder or (self._worker and self._worker.isRunning()):
             return
         out, _ = QFileDialog.getSaveFileName(self, "Save movie as",
-                                             os.path.join(self._folder, "movie.mp4"), "MP4 (*.mp4)")
+                                             default_output(self._folder), "MP4 (*.mp4)")
         if not out:
             print("[tiff2mp4] Save dialog cancelled - nothing written.", flush=True)
             return
