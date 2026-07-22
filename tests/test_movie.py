@@ -24,6 +24,12 @@ def test_zero_padded_prefixes_keep_working(tmp_path):
     assert _prefixes(list_tiffs(str(tmp_path))) == [f"{i:04d}" for i in range(1, 150)]
 
 
+def test_squid_fluorescence_naming_from_zero_with_midname_digits(tmp_path):
+    # real customer scheme: unpadded prefix from 0, plus a constant digit run (488) mid-name
+    _make(tmp_path, [f"{i}_Fluorescence_488_nm_Ex.tiff" for i in range(0, 149)])
+    assert _prefixes(list_tiffs(str(tmp_path))) == [str(i) for i in range(0, 149)]
+
+
 def test_mixed_extensions_still_deduped_and_ordered(tmp_path):
     _make(tmp_path, ["2_a.tif", "10_a.tiff", "1_a.TIFF"])
     assert _prefixes(list_tiffs(str(tmp_path))) == ["1", "2", "10"]
