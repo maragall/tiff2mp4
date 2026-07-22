@@ -12,17 +12,25 @@ from __future__ import annotations
 
 import glob
 import os
+import re
 
 import numpy as np
 import tifffile
 
+_DIGIT_RUN = re.compile(r"(\d+)")
+
+
+def _natural_key(path: str):
+    # unpadded frame numbers must compare numerically: 2_x.tiff before 10_x.tiff
+    return [int(part) if part.isdigit() else part for part in _DIGIT_RUN.split(os.path.basename(path))]
+
 
 def list_tiffs(folder: str) -> list:
-    """Every .tif/.tiff in *folder*, sorted by name (the frame order)."""
+    """Every .tif/.tiff in *folder*, naturally sorted by name (the frame order)."""
     files: list = []
     for ext in ("*.tif", "*.tiff", "*.TIF", "*.TIFF"):
         files += glob.glob(os.path.join(folder, ext))
-    return sorted(set(files))
+    return sorted(set(files), key=_natural_key)
 
 
 def _to_uint8(plane: "np.ndarray") -> "np.ndarray":
